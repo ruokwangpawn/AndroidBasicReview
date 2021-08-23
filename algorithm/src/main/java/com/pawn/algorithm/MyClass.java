@@ -1,4 +1,4 @@
-package com.pawn.example;
+package com.pawn.algorithm;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
