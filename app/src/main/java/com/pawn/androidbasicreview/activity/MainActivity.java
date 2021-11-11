@@ -11,15 +11,22 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
+import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
+import android.view.Surface;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.pawn.androidbasicreview.R;
 import com.pawn.androidbasicreview.service.IMyAidlInterface;
@@ -42,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     private IMyAidlInterface iMyAidlInterface;
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.e(TAG, "onServiceConnected: 绑定AIDL成功");
@@ -61,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        LocalBroadcastManager.getInstance(this).registerReceiver();
+
         ActivityManager service = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         int memory = service.getMemoryClass();
         Log.e(TAG, "onCreate:memory ---> " + memory);
@@ -71,12 +80,20 @@ public class MainActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
         disPlaySystemInfo(metrics);
 
-        findViewById(R.id.tv).setOnClickListener(new View.OnClickListener() {
+        TextView tv = findViewById(R.id.tv);
+        tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, SecondActivity.class));
             }
         });
+
+        new Thread() {
+            @Override
+            public void run() {
+                tv.setText("Change in thread when onCreate");
+            }
+        }.start();
 
         SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -104,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
             String fileSize = Formatter.formatFileSize(this, freeSpace);
         }
 
+//        SparseArray
 
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("xxx.txt")));
@@ -117,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 //            e.printStackTrace();
 //        }
 
-        countDownTimer = new CountDownTimer(time * 1000, 1000) {
+        countDownTimer = new CountDownTimer(time * 1000L, 1000L) {
             @Override
             public void onTick(long millisUntilFinished) {
                 Log.e(TAG, "onTick: " + millisUntilFinished);
